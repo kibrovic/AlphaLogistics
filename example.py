@@ -1,5 +1,5 @@
 import googlemaps
-import json
+import re
 from pprint import pprint
 from datetime import datetime
 
@@ -12,8 +12,6 @@ def get_distance(origins, destinations, print_to_screen=True):
         destinations=destinations
     )
     if print_to_screen:
-        print(json.dumps(distance, indent=4))
-        print()
         pprint(distance)
     return distance
 
@@ -26,9 +24,7 @@ def get_directions(origin, destination, print_to_screen=False):
         departure_time=datetime.now()
     )
     if print_to_screen:
-        #print(json.dumps(directions, indent=4))
-        print(type(directions))
-        pprint(directions[0]['legs'][0]['steps'][1]['html_instructions'])
+        pprint(directions[0]['legs'][0]['steps'])
     return directions
 
 origin = input("Enter starting point: ").strip(".,- ")
@@ -48,9 +44,14 @@ if prnt_dir == 'y':
 
 countries = []
 def check_for_countries(directions_response):
+    p = re.compile('(entering)\s([^\n\r]*)', re.IGNORECASE)
+    print(p)
     for i in range(len(directions_response[0]['legs'][0]['steps'])):
-        print(directions_response[0]['legs'][0]['steps'][i]['html_instructions'].lower())
-        if "entering" in directions_response[0]['legs'][0]['steps'][i]['html_instructions'].lower():
-            countries.append(directions_response[0]['legs'][0]['steps'][i]['html_instructions'])
+        #print(directions_response[0]['legs'][0]['steps'][i]['html_instructions'].lower())
+        match = p.findall(directions_response[0]['legs'][0]['steps'][i]['html_instructions'])
+        print(match)
+        if match:
+            countries.append(match[0][1].strip('</div>'))
+
     print("\n",countries)
 check_for_countries(directions_response)
