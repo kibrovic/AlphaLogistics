@@ -31,9 +31,16 @@ def check_for_countries(directions_response):
     coords = [i['end_location'] for i in directions_response]
 
     for i in range(len(coords)):
-        print("checking %d geolocation" % i, end='\r')
-        geocode = gmaps.reverse_geocode((str(coords[i]['lat']) + ',' + str(coords[i]['lng'])), result_type='country')
-        countries.append(geocode[0]['address_components'][0]['long_name'])
+        try:
+            print("checking %d geolocation" % i, end='\r')
+            geocode = gmaps.reverse_geocode((str(coords[i]['lat']) + ',' + str(coords[i]['lng'])), result_type='country')
+            countries.append(geocode[0]['address_components'][0]['long_name'])
+        except IndentationError as e:
+            print("IndentationError:")
+            continue
+        except IndexError as e:
+            print("IndexError")
+            continue
     countries = list(set(countries))
     return(countries)
 
