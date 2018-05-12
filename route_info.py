@@ -1,5 +1,5 @@
 import googlemaps
-import re
+
 from pprint import pprint
 from datetime import datetime, timedelta
 
@@ -30,13 +30,13 @@ def get_directions(origin, destination, waypoints=None):
 
 def check_for_countries(directions_response):
     """Extract all countries entered"""
-    print("checking for countries")
+    print("Prikupljanje geografskih podataka...")
     countries = []
     coords = [i['end_location'] for j in range(len(directions_response)) for i in directions_response[j]['steps']]
 
     for i in range(len(coords)):
         try:
-            print("checking %d geolocation" % i, end='\r')
+            print("Provjera %d geolokacija" % i, end='\r')
             geocode = gmaps.reverse_geocode((str(coords[i]['lat']) + ',' + str(coords[i]['lng'])), result_type='country')
             countries.append(geocode[0]['address_components'][0]['long_name'])
         except IndentationError:
@@ -58,63 +58,54 @@ class RouteInfo:
         self.distance = get_distance(self.directions)
         self.duration = get_duration(self.directions)
         self.countries = check_for_countries(self.directions)
-        
-    
+
+
 def make_a_class(class_name, origin, destination, waypoints):
     class_name = RouteInfo(origin, destination, waypoints)
     return class_name
 
+return_list = []
+def get_route_info():
+    origin = input("Unesite polazište: ").strip(".,- ")
+    print(origin)
+    destination = input("Unesite odredište: ").strip(".,- ")
+    print(destination)
+    waypoints = []
+    stop = 'n'
+    while stop !='y':
+        waypoints.append(input("Usputna odredišta[prozivoljno]: "))
+        stop = input("Stop (y/[n])")
+    print('|'.join(waypoints))
+    new_name = origin + "_" + destination
+    new_name = make_a_class(new_name, origin, destination, waypoints)
 
-origin = input("Enter starting point: ").strip(".,- ")
-print(origin)
-destination = input("Enter delivering point: ").strip(".,- ")
-print(destination)
-waypoints = []
-stop = 'n'
-while stop!='y':
-    waypoints.append(input("Waypoints: "))
-    stop = input("Stop (y/[n])")
-print('|'.join(waypoints))
-new_name = origin + "_" + destination
-new_name = make_a_class(new_name, origin, destination, waypoints)
+    stop = 'n'
+    while stop != 'y':
+        info = input("""
+        Dostupne informacije: \n
+        [1]: Polazište \n
+        [2]: Odredište \n
+        [3]: Udaljenost \n
+        [4]: Vrijeme vožnje \n
+        [5]: Države\n
+        """)
 
-stop = 'n'
-while stop != 'y':
-    info = input("""
-    What would you like to know: \n
-    [1]: Origin \n
-    [2]: Destination \n
-    [3]: Distance \n
-    [4]: Duration \n
-    [5]: Directions \n
-    [6]: Countries \n
-    """)
+        info_dir = {
+            '1': new_name.origin,
+            '2': new_name.destination,
+            '3': str(new_name.distance) + " (km)",
+            '4': str(new_name.duration) + "(hh/mm/ss)",
+            '5': "-".join(new_name.countries)
+        }
+        val = info_dir[info]
+        print(val)
 
-    info_dir = {
-        '1': new_name.origin,
-        '2': new_name.destination,
-        '3': new_name.distance,
-        '4': new_name.duration,
-        '5': new_name.directions,
-        '6': new_name.countries
-    }
-    val = info_dir[info]
-    print(val)
+        stop = input("Stop (y/[n])")
+    for val in info_dir.items():
+        print(val[1])
+        return_list.append(val[1])
 
-    stop = input("Do you want to stop? (y): ")
+    return return_list
 
 
-
-#Used for testing
-#szb = RouteInfo("sarajevo", "beograd", "zagreb")
-#pprint(szb.duration)
-#szb = get_directions("sarajevo", "beograd", "zagreb")
-'''szb = gmaps.directions(
-    "sarajevo",
-    "beograd",
-    waypoints="zagreb",
-    mode="driving"
-)'''
-#pprint(szb)
-#print(check_for_countries(szb))
-#print(get_duration(szb))
+#get_route_info()
